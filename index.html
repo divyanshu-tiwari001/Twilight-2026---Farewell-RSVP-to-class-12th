@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Twilight 2026 RSVP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      -webkit-user-select: none; /* Safari */
+      -ms-user-select: none; /* IE 10+ and Edge */
+      -moz-user-select: none; /* Firefox */
+      user-select: none; /* Standard syntax */
+    }
+    input, textarea {
+      -webkit-user-select: auto; /* Safari */
+      -ms-user-select: auto; /* IE 10+ and Edge */
+      -moz-user-select: auto; /* Firefox */
+      user-select: auto; /* Standard syntax */
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'serif': ['"Playfair Display"', 'serif'],
+            'sans': ['"Poppins"', 'sans-serif'],
+          },
+          colors: {
+            'brand-purple': '#2a2455',
+            'brand-deep-blue': '#0c0f22',
+            'brand-gold': '#fde047',
+            'brand-light': '#e0e7ff',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.5s ease-out',
+            'stars': 'animateStars 50s linear infinite',
+            'glow': 'subtleGlow 3s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: 0 },
+              '100%': { opacity: 1 },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: 0 },
+              '100%': { transform: 'translateY(0)', opacity: 1 },
+            },
+            animateStars: {
+              'from': { backgroundPosition: '0 0' },
+              'to': { backgroundPosition: '-10000px 5000px' },
+            },
+            subtleGlow: {
+              '0%, 100%': { textShadow: '0 0 5px #fde047, 0 0 10px #fde047, 0 0 15px #fde04766' },
+              '50%': { textShadow: '0 0 10px #fde047, 0 0 20px #fde047, 0 0 30px #fde04766' },
+            }
+          }
+        },
+      },
+    }
+  </script>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react": "https://esm.sh/react@18.2.0",
+    "framer-motion": "https://esm.sh/framer-motion@10.16.4?deps=react@18.2.0",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+    "react/": "https://esm.sh/react@18.2.0/"
+  }
+}
+</script>
+</head>
+<body class="bg-brand-deep-blue text-brand-light font-sans">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
