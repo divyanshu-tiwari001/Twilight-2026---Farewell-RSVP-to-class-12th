@@ -6,9 +6,21 @@ import RsvpForm from './components/RsvpForm';
 import RsvpView from './components/AdminView';
 import SplashScreen from './components/SplashScreen';
 import Footer from './components/Footer';
-import { AnimatePresence, motion } from 'framer-motion';
+import ParticleBackground from './components/ParticleBackground';
+import { AnimatePresence, motion, useMotionValue, useTransform, MotionValue } from 'framer-motion';
 
 type View = 'form' | 'rsvp';
+
+const StarryBackground: React.FC<{ style: { x: MotionValue<number>; y: MotionValue<number> } }> = ({ style }) => (
+  <motion.div
+    className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] z-[-2]"
+    style={{
+      backgroundImage: 'url(https://www.transparenttextures.com/patterns/stardust.png)',
+      backgroundRepeat: 'repeat',
+      ...style,
+    }}
+  />
+);
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('form');
@@ -16,7 +28,6 @@ const App: React.FC = () => {
     try {
       const savedRsvps = window.localStorage.getItem('twilight2026-rsvps');
       if (savedRsvps) {
-        // Parse the stored JSON and convert timestamp strings back to Date objects
         return JSON.parse(savedRsvps).map((rsvp: RSVP) => ({
           ...rsvp,
           timestamp: new Date(rsvp.timestamp),
@@ -32,11 +43,10 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 3000); // Splash screen duration
+    const timer = setTimeout(() => setIsLoading(false), 3000);
     return () => clearTimeout(timer);
   }, []);
 
-  // Effect to save RSVPs to localStorage whenever the list changes
   useEffect(() => {
     try {
       window.localStorage.setItem('twilight2026-rsvps', JSON.stringify(rsvps));
@@ -58,24 +68,19 @@ const App: React.FC = () => {
     }, 40000);
   };
 
-  const StarryBackground: React.FC = () => (
-    <motion.div 
-      className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] z-[-1]"
-      style={{
-        backgroundImage: 'url(https://www.transparenttextures.com/patterns/stardust.png)',
-        backgroundRepeat: 'repeat',
-      }}
-      animate={{
-        x: [0, 100, 0, -100, 0],
-        y: [0, 50, 100, 50, 0],
-      }}
-      transition={{
-        duration: 300,
-        ease: "linear",
-        repeat: Infinity,
-      }}
-    />
-  );
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const starX = useTransform(x, (latest) => latest / 25);
+  const starY = useTransform(y, (latest) => latest / 25);
+  const particleX = useTransform(x, (latest) => latest / 15);
+  const particleY = useTransform(y, (latest) => latest / 15);
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    const { clientX, clientY } = event;
+    const { innerWidth, innerHeight } = window;
+    x.set(clientX - innerWidth / 2);
+    y.set(clientY - innerHeight / 2);
+  };
   
   const pageVariants = {
     initial: { opacity: 0, y: 30, scale: 0.98 },
@@ -90,8 +95,12 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <StarryBackground />
+    <div
+      className="relative min-h-screen overflow-hidden"
+      onMouseMove={handleMouseMove}
+    >
+      <StarryBackground style={{ x: starX, y: starY }} />
+      <ParticleBackground motionStyle={{ x: particleX, y: particleY }} />
       <AnimatePresence mode="wait">
         {isLoading ? (
           <SplashScreen key="splash" />
