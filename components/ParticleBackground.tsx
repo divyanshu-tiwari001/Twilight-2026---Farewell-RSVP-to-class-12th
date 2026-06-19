@@ -1,8 +1,8 @@
 
-import React, { useEffect, useState, useMemo } from 'react';
-import Particles, { initParticlesEngine } from 'react-tsparticles';
+import React, { useMemo } from 'react';
+import Particles from 'react-tsparticles';
 import { loadSlim } from 'tsparticles-slim';
-import type { Container, ISourceOptions } from "tsparticles-engine";
+import type { Container, ISourceOptions, Engine } from "tsparticles-engine";
 import { motion } from 'framer-motion';
 
 interface ParticleBackgroundProps {
@@ -10,15 +10,9 @@ interface ParticleBackgroundProps {
 }
 
 const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ motionStyle }) => {
-    const [init, setInit] = useState(false);
-
-    useEffect(() => {
-        initParticlesEngine(async (engine) => {
-            await loadSlim(engine);
-        }).then(() => {
-            setInit(true);
-        });
-    }, []);
+    const particlesInit = async (engine: Engine): Promise<void> => {
+        await loadSlim(engine);
+    };
 
     const particlesLoaded = async (container?: Container): Promise<void> => {
         // You can add logic here for when particles are loaded
@@ -88,14 +82,13 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ motionStyle }) 
             style={motionStyle}
             className="absolute top-0 left-0 w-full h-full z-[-1]"
         >
-            {init && (
-                 <Particles
-                    id="tsparticles"
-                    particlesLoaded={particlesLoaded}
-                    options={options}
-                    className="h-full w-full"
-                />
-            )}
+            <Particles
+                id="tsparticles"
+                init={particlesInit}
+                loaded={particlesLoaded}
+                options={options}
+                className="h-full w-full"
+            />
         </motion.div>
     );
 };
