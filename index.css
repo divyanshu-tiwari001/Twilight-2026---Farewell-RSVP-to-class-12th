@@ -1,0 +1,21 @@
+/* Twilight 2026 RSVP Manager Styles */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+/* Custom styles for smoother experience */
+::selection {
+  background-color: rgba(253, 224, 71, 0.2); /* brand-gold with opacity */
+  color: #fde047;
+}
+
+/* Responsive and fallback container adjustments */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
