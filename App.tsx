@@ -125,7 +125,11 @@ const App: React.FC = () => {
                         exit="out"
                         transition={pageTransition}
                     >
-                        <RsvpForm onSubmit={handleRsvpSubmit} showSuccess={showSuccess} />
+                        <RsvpForm 
+                          onSubmit={handleRsvpSubmit} 
+                          showSuccess={showSuccess} 
+                          onReset={() => setShowSuccess(false)} 
+                        />
                     </motion.div>
                     )}
                     {currentView === 'rsvp' && (

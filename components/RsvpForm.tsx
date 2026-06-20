@@ -2,19 +2,33 @@
 import React, { useState } from 'react';
 import { RSVP } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { User, Check, Users, ShieldAlert, Award, Calendar, MapPin, Contact, Ticket, QrCode } from 'lucide-react';
 
 interface RsvpFormProps {
   onSubmit: (rsvp: Omit<RSVP, 'id' | 'timestamp'>) => void;
   showSuccess: boolean;
+  onReset?: () => void;
 }
 
-const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit, showSuccess }) => {
+const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit, showSuccess, onReset }) => {
   const [name, setName] = useState('');
   const [attending, setAttending] = useState<boolean | null>(null);
   const [selectedClass, setSelectedClass] = useState<'11th' | '12th' | null>(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isConfirming, setIsConfirming] = useState(false);
+
+  const handleResetForm = () => {
+    setName('');
+    setAttending(null);
+    setSelectedClass(null);
+    setMessage('');
+    setError('');
+    if (onReset) onReset();
+  };
+
+  // Generate a mock ticket reservation number
+  const [ticketNo] = useState(() => `TWL-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(10 + Math.random() * 89)}`);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,13 +49,9 @@ const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit, showSuccess }) => {
   };
 
   const handleConfirmSubmit = () => {
-    // The checks are already done, so we can assert they're not null.
     onSubmit({ name, attending: attending!, class: selectedClass!, message });
     setIsConfirming(false);
-    setName('');
-    setAttending(null);
-    setSelectedClass(null);
-    setMessage('');
+    // Don't fully reset fields instantly to let the victory ticket load user names
   };
 
   const backdropVariants = {
@@ -50,18 +60,18 @@ const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit, showSuccess }) => {
   };
 
   const modalVariants = {
-    hidden: { opacity: 0, y: -50, scale: 0.95 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 30 } },
-    exit: { opacity: 0, y: 50, scale: 0.95, transition: { duration: 0.2 } },
+    hidden: { opacity: 0, y: -40, scale: 0.95 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 350, damping: 25 } },
+    exit: { opacity: 0, y: 40, scale: 0.95, transition: { duration: 0.25 } },
   };
 
   const formContainerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.08, duration: 0.6 } },
   };
 
   const formItemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 15 },
     visible: { opacity: 1, y: 0 },
   };
 
@@ -71,155 +81,259 @@ const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit, showSuccess }) => {
         {showSuccess ? (
           <motion.div
             key="success"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.3 }}
-            className="relative max-w-xl mx-auto text-center p-8 bg-brand-purple/50 backdrop-blur-sm rounded-lg shadow-2xl overflow-hidden border border-brand-gold/50"
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 22 }}
+            className="max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.8)] border border-brand-gold/30 bg-[#080d1a] relative"
           >
-            <motion.div 
-              className="absolute inset-[-100%] animate-[spin_4s_linear_infinite]"
-              style={{
-                background: 'conic-gradient(from 90deg at 50% 50%, #fde047 0%, #2a2455 25%, #fde047 50%, #2a2455 75%, #fde047 100%)'
-              }}
-            />
-            <div className="relative z-10">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-brand-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <motion.path
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <h2 className="mt-4 text-3xl font-serif text-white">Thank You!</h2>
-              <p className="mt-2 text-brand-light/80">Your RSVP has been recorded.</p>
+            {/* Ambient gold glow glow */}
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
 
-              <div className="mt-6 border-t border-brand-gold/30 pt-6 text-lg space-y-3">
-                <div className="flex justify-between items-center">
-                    <span className="font-semibold text-brand-light/80">Venue:</span>
-                    <span className="font-sans font-medium text-white text-right">Senior Wing, CSDAVPS</span>
+            <div className="p-8 md:p-10 relative z-10">
+              <div className="flex flex-col items-center text-center">
+                <div className="h-16 w-16 bg-brand-gold/10 rounded-full border border-brand-gold/30 flex items-center justify-center text-brand-gold mb-4 shadow-lg">
+                  <Check className="h-8 w-8 stroke-[2]" />
                 </div>
-                <div className="flex justify-between items-center">
-                    <span className="font-semibold text-brand-light/80">Date:</span>
-                    <span className="font-sans font-medium text-white">09 February 2026</span>
+                <h2 className="text-3xl font-serif text-white font-semibold">RSVP Appreciated</h2>
+                <p className="mt-1.5 text-xs tracking-widest text-brand-gold/80 uppercase font-sans font-medium">Thank you for your confirmation</p>
+              </div>
+
+              {/* Gala Ticket Mock-up */}
+              <div className="mt-8 border border-white/10 rounded-xl bg-slate-950/60 overflow-hidden shadow-2xl relative">
+                {/* Simulated punched ticket sides */}
+                <span className="absolute left-[-8px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#080d1a] border-r border-white/10" />
+                <span className="absolute right-[-8px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#080d1a] border-l border-white/10" />
+
+                {/* Top Half of Ticket */}
+                <div className="p-6 md:p-8 space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium font-sans block">GUEST DELEGATE</span>
+                      <span className="text-lg font-semibold text-white tracking-wide block">{name || "Respected Attendee"}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium block">TICKET ID</span>
+                      <span className="text-sm font-semibold text-brand-gold font-mono tracking-wider block">{ticketNo}</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
+                    <div>
+                      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium block">CONFERENCE CLASS</span>
+                      <span className="text-sm font-medium text-slate-200">Class {selectedClass || "12th"} Grade</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium block">STATUS DECLARED</span>
+                      <span className="text-sm font-semibold text-green-400 flex items-center space-x-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                        <span>{attending === false ? "Excused" : "Attending Assembly"}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dashboard-Ticket separator dashed line */}
+                <div className="relative h-[2px] bg-white/5 border-t border-dashed border-white/20 select-none px-4" />
+
+                {/* Bottom Ticket segment */}
+                <div className="p-6 md:p-8 bg-slate-900/40 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                  <div className="md:col-span-2 space-y-3">
+                    <div className="flex items-center space-x-2 text-xs text-slate-300">
+                      <MapPin className="h-4 w-4 text-brand-gold/80" />
+                      <span className="font-light">Senior Wing Precinct, CSDAVPS</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-xs text-slate-300">
+                      <Calendar className="h-4 w-4 text-brand-gold/80" />
+                      <span className="font-light">09 February 2026, 09:00 AM AST</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-center justify-center border-l md:border-l border-white/5 pl-0 md:pl-6">
+                    <QrCode className="h-12 w-12 text-slate-400 opacity-80 mb-1 stroke-[1.25]" />
+                    <span className="text-[9px] text-slate-500 font-mono tracking-widest">SECURE ENTRYPASS</span>
+                  </div>
                 </div>
               </div>
 
-              <p className="mt-8 text-xs text-brand-light/60">
-                Note: For any problems or queries contact +91 9852176407 or +91 9955888527.
-              </p>
+              {/* Corporate Contact Hotline Sheet */}
+              <div className="mt-8 border-t border-white/5 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+                <span className="text-slate-400 text-center md:text-left">
+                  Any discrepancy or special hospitality requests?
+                </span>
+                <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center text-slate-300">
+                  <a href="tel:+919852176407" className="hover:text-brand-gold hover:underline transition-colors block">
+                    📞 Support I: +91 9852176407
+                  </a>
+                  <a href="tel:+919955888527" className="hover:text-brand-gold hover:underline transition-colors block">
+                    📞 Support II: +91 9955888527
+                  </a>
+                </div>
+              </div>
+
+              {/* Secure action button to register another pass */}
+              <div className="mt-8 pt-4 flex justify-center border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={handleResetForm}
+                  className="px-6 py-3 rounded-xl text-xs uppercase tracking-widest font-semibold border border-brand-gold/30 bg-brand-gold/10 text-brand-gold hover:bg-brand-gold/20 hover:scale-[1.01] transition-all duration-350"
+                >
+                  Register Another Delegate Pass
+                </button>
+              </div>
             </div>
           </motion.div>
         ) : (
           <motion.div
-              key="form-container"
-              className="max-w-xl mx-auto p-8 bg-brand-purple/50 backdrop-blur-sm border border-white/20 rounded-lg shadow-2xl"
+            key="form-container"
+            variants={formContainerVariants}
+            initial="hidden"
+            animate="visible"
+            className="max-w-xl mx-auto rounded-2xl shadow-[0_30px_90px_rgba(0,0,0,0.7)] border border-white/10 bg-slate-950/40 backdrop-blur-xl relative overflow-hidden"
           >
-            <motion.h2 
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-3xl font-serif text-center text-white mb-6"
-            >
-              Join Us for a Day to Remember
-            </motion.h2>
-            <motion.form 
-              onSubmit={handleSubmit} 
-              noValidate
-              variants={formContainerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              <motion.div className="mb-6" variants={formItemVariants}>
-                <label htmlFor="name" className="block text-brand-light/80 mb-2 font-medium">Full Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-brand-deep-blue/50 border border-white/30 rounded-md px-4 py-3 text-white placeholder-brand-light/50 focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all"
-                  placeholder="e.g., Aryan Kumar"
-                  required
-                />
-              </motion.div>
-              <motion.div className="mb-6" variants={formItemVariants}>
-                <span className="block text-brand-light/80 mb-2 font-medium">Please select your class</span>
-                <div className="flex space-x-4">
-                  <motion.button
-                    type="button"
-                    onClick={() => setSelectedClass('11th')}
-                    className={`w-full py-3 rounded-md font-semibold transition-colors duration-300 ${selectedClass === '11th' ? 'bg-brand-gold text-brand-deep-blue shadow-lg' : 'bg-brand-deep-blue/50 border border-white/30 text-white'}`}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.98 }}
-                    animate={{ scale: selectedClass === '11th' ? 1.05 : 1 }}
-                  >
-                    Class 11th
-                  </motion.button>
-                  <motion.button
-                    type="button"
-                    onClick={() => setSelectedClass('12th')}
-                    className={`w-full py-3 rounded-md font-semibold transition-colors duration-300 ${selectedClass === '12th' ? 'bg-brand-gold text-brand-deep-blue shadow-lg' : 'bg-brand-deep-blue/50 border border-white/30 text-white'}`}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.98 }}
-                    animate={{ scale: selectedClass === '12th' ? 1.05 : 1 }}
-                  >
-                    Class 12th
-                  </motion.button>
+            {/* Subtle light gold overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-brand-gold/[0.02] to-transparent pointer-events-none" />
+
+            <div className="p-8 md:p-10 relative z-10 space-y-6">
+              <div className="text-center space-y-1.5">
+                <span className="text-[10px] tracking-[0.25em] text-brand-gold font-sans font-medium uppercase">Declaration Desk</span>
+                <h2 className="text-3xl font-serif text-white tracking-wide">Join Us for a Day to Remember</h2>
+                <p className="text-xs text-slate-400 font-light max-w-sm mx-auto">Please submit your attendee records to finalize the secure class registry seating protocol.</p>
+              </div>
+
+              <form onSubmit={handleSubmit} noValidate className="space-y-6">
+                
+                {/* Guest Full Name Group */}
+                <div className="space-y-2">
+                  <label htmlFor="name" className="text-xs tracking-wider uppercase font-sans font-medium text-slate-300 flex items-center space-x-1.5">
+                    <User className="h-3.5 w-3.5 text-brand-gold" />
+                    <span>Attendee Full Name</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full bg-slate-900/60 border border-white/10 rounded-xl px-4 py-3.5 pl-5 text-white placeholder-slate-500 focus:placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-brand-gold/60 focus:border-brand-gold/60 transition-all font-sans text-sm tracking-wide"
+                      placeholder="e.g. Aryan Kumar"
+                      required
+                    />
+                  </div>
                 </div>
-              </motion.div>
-              <motion.div className="mb-6" variants={formItemVariants}>
-                <span className="block text-brand-light/80 mb-2 font-medium">Will you be attending?</span>
-                <div className="flex space-x-4">
-                  <motion.button
-                    type="button"
-                    onClick={() => setAttending(true)}
-                    className={`w-full py-3 rounded-md font-semibold transition-colors duration-300 ${attending === true ? 'bg-brand-gold text-brand-deep-blue shadow-lg' : 'bg-brand-deep-blue/50 border border-white/30 text-white'}`}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.98 }}
-                    animate={{ scale: attending === true ? 1.05 : 1 }}
-                  >
-                    Yes, I'll be there!
-                  </motion.button>
-                  <motion.button
-                    type="button"
-                    onClick={() => setAttending(false)}
-                    className={`w-full py-3 rounded-md font-semibold transition-colors duration-300 ${attending === false ? 'bg-red-400 text-white shadow-lg' : 'bg-brand-deep-blue/50 border border-white/30 text-white'}`}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.98 }}
-                    animate={{ scale: attending === false ? 1.05 : 1 }}
-                  >
-                    Sorry, can't make it
-                  </motion.button>
+
+                {/* Class Cohort Selection */}
+                <div className="space-y-2">
+                  <label className="text-xs tracking-wider uppercase font-sans font-medium text-slate-300 flex items-center space-x-1.5">
+                    <Users className="h-3.5 w-3.5 text-brand-gold" />
+                    <span>Select Class Cohort</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedClass('11th')}
+                      className={`py-3.5 rounded-xl font-medium text-xs tracking-wider uppercase border transition-all flex items-center justify-center space-x-2 ${
+                        selectedClass === '11th' 
+                          ? 'bg-brand-gold border-brand-gold text-black font-semibold shadow-lg shadow-brand-gold/15'
+                          : 'bg-slate-900/40 border-white/10 text-slate-300 hover:border-white/20 hover:bg-slate-900/60'
+                      }`}
+                    >
+                      <Check className={`h-4 w-4 transition-all ${selectedClass === '11th' ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`} />
+                      <span>Class 11th</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedClass('12th')}
+                      className={`py-3.5 rounded-xl font-medium text-xs tracking-wider uppercase border transition-all flex items-center justify-center space-x-2 ${
+                        selectedClass === '12th' 
+                          ? 'bg-brand-gold border-brand-gold text-black font-semibold shadow-lg shadow-brand-gold/15'
+                          : 'bg-slate-900/40 border-white/10 text-slate-300 hover:border-white/20 hover:bg-slate-900/60'
+                      }`}
+                    >
+                      <Check className={`h-4 w-4 transition-all ${selectedClass === '12th' ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`} />
+                      <span>Class 12th</span>
+                    </button>
+                  </div>
                 </div>
-              </motion.div>
-              <motion.div className="mb-8" variants={formItemVariants}>
-                <label htmlFor="message" className="block text-brand-light/80 mb-2 font-medium">
-                  Leave a message (optional)
-                </label>
-                <textarea
-                  id="message"
-                  rows={4}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="w-full bg-brand-deep-blue/50 border border-white/30 rounded-md px-4 py-3 text-white placeholder-brand-light/50 focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all"
-                  placeholder="Share a memory or a message..."
-                ></textarea>
-              </motion.div>
-              {error && <p className="text-red-400 text-center mb-4">{error}</p>}
-              <motion.div variants={formItemVariants}>
-                <motion.button 
+
+                {/* Attending Status Selector */}
+                <div className="space-y-2">
+                  <label className="text-xs tracking-wider uppercase font-sans font-medium text-slate-300 flex items-center space-x-1.5">
+                    <Ticket className="h-3.5 w-3.5 text-brand-gold" />
+                    <span>Seating Attendance Claim</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setAttending(true)}
+                      className={`py-3.5 rounded-xl font-medium text-xs tracking-wider uppercase border transition-all flex items-center justify-center space-x-2 ${
+                        attending === true 
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 border-emerald-500 text-white font-semibold shadow-lg shadow-emerald-500/15'
+                          : 'bg-slate-900/40 border-white/10 text-slate-300 hover:border-white/20 hover:bg-slate-900/60'
+                      }`}
+                    >
+                      <span>Yes, Attending</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAttending(false)}
+                      className={`py-3.5 rounded-xl font-medium text-xs tracking-wider uppercase border transition-all flex items-center justify-center space-x-2 ${
+                        attending === false 
+                          ? 'bg-red-950/40 border-red-500/40 text-red-300 font-semibold shadow-lg shadow-red-500/10'
+                          : 'bg-slate-900/40 border-white/10 text-slate-300 hover:border-white/20 hover:bg-slate-900/60'
+                      }`}
+                    >
+                      <span>Cannot Attend</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Private Message Box */}
+                <div className="space-y-2">
+                  <label htmlFor="message" className="text-xs tracking-wider uppercase font-sans font-medium text-slate-300 flex items-center space-x-1.5">
+                    <Contact className="h-3.5 w-3.5 text-brand-gold" />
+                    <span>Memory or message for class registry (optional)</span>
+                  </label>
+                  <textarea
+                    id="message"
+                    rows={3}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="w-full bg-slate-900/60 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-slate-505 focus:outline-none focus:ring-1 focus:ring-brand-gold/60 focus:border-brand-gold/60 transition-all font-sans text-sm tracking-wide"
+                    placeholder="Share a sweet memory, high-school recall, or farewell blessings..."
+                  ></textarea>
+                </div>
+
+                {/* Error Banner */}
+                <AnimatePresence>
+                  {error && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="bg-red-950/30 border border-red-500/20 rounded-xl p-3 flex items-center space-x-2.5 text-red-300 text-xs"
+                    >
+                      <ShieldAlert className="h-4 w-4 shrink-0" />
+                      <span>{error}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Submit Action Handle */}
+                <button 
                   type="submit" 
-                  className="w-full bg-brand-gold text-brand-deep-blue font-bold text-lg py-3 rounded-md hover:bg-yellow-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-brand-purple"
-                  whileHover={{ scale: 1.02, transition: { type: 'spring', stiffness: 400, damping: 10 } }}
-                  whileTap={{ scale: 0.98 }}
+                  className="w-full bg-brand-gold text-black font-semibold text-xs tracking-widest uppercase py-4 rounded-xl hover:bg-yellow-400 active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-brand-gold focus:ring-offset-2 focus:ring-offset-brand-purple shadow-xl shadow-brand-gold/10 flex items-center justify-center space-x-2"
                 >
-                  Submit RSVP
-                </motion.button>
-              </motion.div>
-            </motion.form>
+                  <span>Submit Seating Request</span>
+                </button>
+
+              </form>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* Confirmation Modal overlay dialog */}
       <AnimatePresence>
         {isConfirming && (
           <motion.div
@@ -228,7 +342,7 @@ const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit, showSuccess }) => {
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in"
           >
             <motion.div
               key="confirmation-modal"
@@ -236,55 +350,54 @@ const RsvpForm: React.FC<RsvpFormProps> = ({ onSubmit, showSuccess }) => {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="w-full max-w-md bg-brand-purple border border-brand-gold/50 rounded-lg shadow-2xl p-8"
+              className="w-full max-w-md bg-[#0a0f1d] border border-white/10 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.8)] overflow-hidden"
             >
-              <h2 className="text-3xl font-serif text-center text-white mb-4">Confirm Your RSVP</h2>
-              <p className="text-center text-brand-light/80 mb-6">Please review your details before submitting.</p>
-              
-              <div className="space-y-4 text-lg">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-brand-light/70">Name:</span>
-                  <span className="font-semibold text-white">{name}</span>
+              <div className="p-8 space-y-6">
+                <div>
+                  <h3 className="text-2xl font-serif text-white font-medium text-center">Receipt Verification</h3>
+                  <p className="text-center text-xs text-slate-400 mt-1 uppercase font-semibold font-sans tracking-widest">Twilight Valedictory Seating Protocol</p>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-brand-light/70">Class:</span>
-                  <span className="font-semibold text-white">{selectedClass}</span>
-                </div>
-                 <div className="flex justify-between items-center">
-                  <span className="font-medium text-brand-light/70">Status:</span>
-                  <span className={`font-semibold px-3 py-1 text-sm rounded-full ${attending ? 'bg-green-400/20 text-green-300' : 'bg-red-400/20 text-red-300'}`}>
-                    {attending ? "Attending" : "Not Attending"}
-                  </span>
-                </div>
-                {message && (
-                  <div>
-                     <span className="font-medium text-brand-light/70 block mb-2">Message:</span>
-                     <p className="text-brand-light/90 italic border-l-2 border-brand-gold/50 pl-3 text-base">"{message}"</p>
+                
+                <div className="space-y-3 p-4 bg-slate-900/60 rounded-xl border border-white/5 text-sm">
+                  <div className="flex justify-between items-center py-2 border-b border-white/5">
+                    <span className="text-slate-400">Representative Name:</span>
+                    <span className="font-semibold text-white">{name}</span>
                   </div>
-                )}
-              </div>
+                  <div className="flex justify-between items-center py-2 border-b border-white/5">
+                    <span className="text-slate-400">Academic Cohort:</span>
+                    <span className="font-semibold text-white">Class {selectedClass}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-slate-400">Attendance Claim:</span>
+                    <span className={`font-semibold px-2.5 py-0.5 text-xs rounded-full ${attending ? 'bg-emerald-500/10 text-emerald-300' : 'bg-red-400/10 text-red-300'}`}>
+                      {attending ? "Declaring Attendance" : "Declaring Departure"}
+                    </span>
+                  </div>
+                  {message && (
+                    <div className="pt-3 border-t border-white/5">
+                      <span className="text-slate-400 block pb-1">Registry Message:</span>
+                      <p className="text-slate-300 italic text-xs leading-relaxed bg-[#060a14] rounded p-2.5 border border-white/5">"{message}"</p>
+                    </div>
+                  )}
+                </div>
 
-              <div className="mt-8 flex space-x-4">
-                <motion.button
-                  type="button"
-                  onClick={() => setIsConfirming(false)}
-                  className="w-full py-3 rounded-md font-semibold transition-colors duration-300 bg-white/10 text-brand-light hover:bg-white/20"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Go Back
-                </motion.button>
-                <motion.button
-                  type="button"
-                  onClick={handleConfirmSubmit}
-                  className="w-full bg-brand-gold text-brand-deep-blue font-bold py-3 rounded-md hover:bg-yellow-300 transition-colors duration-300"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Confirm & Submit
-                </motion.button>
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirming(false)}
+                    className="w-full py-3.5 rounded-xl font-medium text-xs uppercase tracking-wider transition-all bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10"
+                  >
+                    Modify
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmSubmit}
+                    className="w-full bg-brand-gold text-black font-semibold py-3.5 rounded-xl text-xs uppercase tracking-wider hover:bg-yellow-400 transition-all shadow-lg"
+                  >
+                    Affirm & Submit
+                  </button>
+                </div>
               </div>
-
             </motion.div>
           </motion.div>
         )}

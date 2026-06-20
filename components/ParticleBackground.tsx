@@ -37,7 +37,7 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ motionStyle }) 
         },
         particles: {
             color: {
-                value: ["#fde047", "#e0e7ff"],
+                value: ["#d4af37", "#f1f5f9"],
             },
             links: {
                 enable: false,
